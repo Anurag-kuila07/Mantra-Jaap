@@ -54,7 +54,6 @@ export default function MantraJaapClient() {
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
 
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   const { toast } = useToast();
@@ -75,16 +74,8 @@ export default function MantraJaapClient() {
     }
   }, [isAnimating]);
 
-  useEffect(() => {
-    if (isResetting) {
-      const timeout = setTimeout(() => setIsResetting(false), 200);
-      return () => clearTimeout(timeout);
-    }
-  }, [isResetting]);
-
   const handleReset = () => {
     setCount(0);
-    setIsResetting(true);
   };
 
   const handleSaveSession = () => {
@@ -203,7 +194,6 @@ export default function MantraJaapClient() {
           <Button
             variant="outline"
             onClick={handleReset}
-            className={isResetting ? "animate-button-press" : ""}
           >
             <RotateCw className="w-4 h-4 mr-2" />
             Reset
