@@ -68,8 +68,13 @@ export default function MantraJaapClient() {
   const audioChunksRef = useRef<Blob[]>([]);
 
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const startTimer = useCallback(() => {
     if (!isTimerActive) setIsTimerActive(true);
@@ -118,6 +123,10 @@ export default function MantraJaapClient() {
   }, []);
 
   const processAudio = useCallback(async () => {
+    if (audioChunksRef.current.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
     setIsProcessing(true);
     toast({
       title: "Processing Audio",
@@ -235,6 +244,10 @@ export default function MantraJaapClient() {
   };
 
   const malasCompleted = (count / malaReps).toFixed(2);
+  
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="w-full max-w-2xl mx-auto font-headline">
