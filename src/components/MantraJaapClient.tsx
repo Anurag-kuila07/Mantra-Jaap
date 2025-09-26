@@ -62,18 +62,26 @@ export default function MantraJaapClient() {
   const [count, setCount] = useState(0);
   const [malaReps, setMalaReps] = useLocalStorage("malaReps", 108);
   const [newMalaReps, setNewMalaReps] = useState(malaReps);
+  const [soundOnCount, setSoundOnCount] = useLocalStorage("soundOnCount", false);
 
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
   const [isClient, setIsClient] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
+    // Use a silent audio data URL to avoid network requests for a simple click
+    setAudio(new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"));
   }, []);
 
   const handleIncrement = () => {
     setCount((prev) => prev + 1);
+    if (soundOnCount && audio) {
+      audio.currentTime = 0;
+      audio.play().catch(e => console.error("Error playing sound:", e));
+    }
   };
 
   const handleReset = () => {
@@ -234,7 +242,11 @@ export default function MantraJaapClient() {
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="sound-feedback">Sound on Count</Label>
-                  <Switch id="sound-feedback" disabled />
+                  <Switch 
+                    id="sound-feedback"
+                    checked={soundOnCount}
+                    onCheckedChange={setSoundOnCount}
+                  />
                 </div>
               </div>
               <DialogFooter>
