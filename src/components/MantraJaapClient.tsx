@@ -13,6 +13,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -40,6 +51,7 @@ import {
   Settings,
   Pencil,
   BookOpen,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -52,8 +64,6 @@ export default function MantraJaapClient() {
   const [newMalaReps, setNewMalaReps] = useState(malaReps);
 
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
-
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   const { toast } = useToast();
@@ -64,15 +74,7 @@ export default function MantraJaapClient() {
 
   const handleIncrement = () => {
     setCount((prev) => prev + 1);
-    setIsAnimating(true);
   };
-
-  useEffect(() => {
-    if (isAnimating) {
-      const timeout = setTimeout(() => setIsAnimating(false), 400);
-      return () => clearTimeout(timeout);
-    }
-  }, [isAnimating]);
 
   const handleReset = () => {
     setCount(0);
@@ -96,6 +98,15 @@ export default function MantraJaapClient() {
     }
   };
 
+  const handleDeleteSession = (sessionId: string) => {
+    setSessions(sessions.filter((session) => session.id !== sessionId));
+    toast({
+      title: "Session Deleted",
+      description: "The session has been removed from your history.",
+      variant: "destructive"
+    });
+  };
+
   const malasCompleted = (count / malaReps).toFixed(2);
 
   if (!isClient) {
@@ -109,7 +120,7 @@ export default function MantraJaapClient() {
           <CardContent className="flex flex-col items-center justify-center gap-6">
             <div className="h-24 w-40 bg-muted rounded-lg"></div>
             <div className="flex justify-around w-full">
-                <div className="h-12 bg-muted rounded-md w-1/4"></div>
+              <div className="h-12 bg-muted rounded-md w-1/4"></div>
             </div>
             <div className="h-16 bg-muted rounded-md w-1/2"></div>
           </CardContent>
@@ -166,9 +177,7 @@ export default function MantraJaapClient() {
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-6">
           <div
-            className={`text-8xl font-bold text-primary-foreground ${
-              isAnimating ? "animate-count-update" : ""
-            }`}
+            className="text-8xl font-bold text-primary-foreground"
             style={{ color: "hsl(var(--primary-foreground))" }}
           >
             {count}
@@ -191,10 +200,7 @@ export default function MantraJaapClient() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-          >
+          <Button variant="outline" onClick={handleReset}>
             <RotateCw className="w-4 h-4 mr-2" />
             Reset
           </Button>
@@ -264,6 +270,7 @@ export default function MantraJaapClient() {
                     <TableHead>Mantra</TableHead>
                     <TableHead className="text-right">Count</TableHead>
                     <TableHead className="text-right">Malas</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -280,11 +287,40 @@ export default function MantraJaapClient() {
                         <TableCell className="text-right">
                           {session.malas}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete your session from the
+                                  history.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteSession(session.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center">
+                      <TableCell colSpan={5} className="text-center">
                         No saved sessions yet.
                       </TableCell>
                     </TableRow>
