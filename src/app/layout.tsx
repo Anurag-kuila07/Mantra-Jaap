@@ -19,6 +19,24 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&display=swap" rel="stylesheet" />
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `
+              atOptions = {
+                'key' : '5fcf7f7e2d5dc6ecbc46881c2e9a4b19',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+              };
+            `,
+          }}
+        />
+        <Script
+          type="text/javascript"
+          src="//recitalfinancially.com/5fcf7f7e2d5dc6ecbc46881c2e9a4b19/invoke.js"
+        />
       </head>
       <body className="font-body antialiased">
         {children}
