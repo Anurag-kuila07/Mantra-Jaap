@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { Session } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ export default function MantraJaapClient() {
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
 
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   const { toast } = useToast();
@@ -61,15 +62,6 @@ export default function MantraJaapClient() {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  useEffect(() => {
-    if (!isClient) return;
-    const storedMantra = localStorage.getItem("mantra");
-    if (storedMantra) {
-      setMantra(JSON.parse(storedMantra));
-      setNewMantra(JSON.parse(storedMantra));
-    }
-  }, [isClient, setMantra]);
 
   const handleIncrement = () => {
     setCount((prev) => prev + 1);
@@ -83,13 +75,21 @@ export default function MantraJaapClient() {
     }
   }, [isAnimating]);
 
+  useEffect(() => {
+    if (isResetting) {
+      const timeout = setTimeout(() => setIsResetting(false), 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [isResetting]);
+
   const handleReset = () => {
     setCount(0);
+    setIsResetting(true);
   };
 
   const handleSaveSession = () => {
     if (count > 0) {
-      const newSession: Omit<Session, 'duration'> = {
+      const newSession: Session = {
         id: new Date().toISOString(),
         date: new Date().toLocaleDateString(),
         mantra,
@@ -200,7 +200,11 @@ export default function MantraJaapClient() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
-          <Button variant="outline" onClick={handleReset}>
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className={isResetting ? "animate-button-press" : ""}
+          >
             <RotateCw className="w-4 h-4 mr-2" />
             Reset
           </Button>
