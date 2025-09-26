@@ -48,6 +48,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 
+const AUDIO_MIME_TYPE = 'audio/webm;codecs=opus';
+
 export default function MantraJaapClient() {
   const [mantra, setMantra] = useLocalStorage("mantra", "Om Namah Shivaya");
   const [newMantra, setNewMantra] = useState(mantra);
@@ -110,7 +112,7 @@ export default function MantraJaapClient() {
     startTimer();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: AUDIO_MIME_TYPE });
       mediaRecorderRef.current.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
@@ -121,7 +123,7 @@ export default function MantraJaapClient() {
           description: "AI is counting your chants...",
         });
         const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/webm",
+          type: AUDIO_MIME_TYPE,
         });
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
@@ -131,7 +133,7 @@ export default function MantraJaapClient() {
             const result = await countMantras({
               audioDataUri,
               mantra,
-              sampleRate: 44100, // Common sample rate
+              sampleRate: 48000,
             });
             setCount((prev) => prev + result.count);
             toast({
@@ -359,7 +361,7 @@ export default function MantraJaapClient() {
             <CardHeader>
                 <CardTitle>Session History</CardTitle>
                 <CardDescription>Review your past chanting sessions.</CardDescription>
-            </CardHeader>
+            </Header>
             <CardContent>
               <Table>
                 <TableHeader>
