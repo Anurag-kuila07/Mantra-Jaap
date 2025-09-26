@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { countMantras } from "@/ai/flows/voice-activated-counting";
+import { useState, useEffect, useCallback } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { Session } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -35,20 +34,15 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Mic,
   Plus,
   RotateCw,
   Save,
   Settings,
   Pencil,
-  Loader2,
   BookOpen,
-  Hourglass,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
-
-const AUDIO_MIME_TYPE = "audio/webm;codecs=opus";
 
 export default function MantraJaapClient() {
   const [mantra, setMantra] = useLocalStorage("mantra", "Om Namah Shivaya");
@@ -57,15 +51,7 @@ export default function MantraJaapClient() {
   const [malaReps, setMalaReps] = useLocalStorage("malaReps", 108);
   const [newMalaReps, setNewMalaReps] = useState(malaReps);
 
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isTimerActive, setIsTimerActive] = useState(false);
-
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
-
-  const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   const [isAnimating, setIsAnimating] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -76,24 +62,16 @@ export default function MantraJaapClient() {
     setIsClient(true);
   }, []);
 
-  const startTimer = useCallback(() => {
-    if (!isTimerActive) setIsTimerActive(true);
-  }, [isTimerActive]);
-
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isTimerActive) {
-      interval = setInterval(() => {
-        setElapsedTime((prevTime) => prevTime + 1);
-      }, 1000);
+    if (!isClient) return;
+    const storedMantra = localStorage.getItem("mantra");
+    if (storedMantra) {
+      setMantra(JSON.parse(storedMantra));
+      setNewMantra(JSON.parse(storedMantra));
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isTimerActive]);
+  }, [isClient, setMantra]);
 
   const handleIncrement = () => {
-    startTimer();
     setCount((prev) => prev + 1);
     setIsAnimating(true);
   };
@@ -105,134 +83,18 @@ export default function MantraJaapClient() {
     }
   }, [isAnimating]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const secs = (seconds % 60).toString().padStart(2, "0");
-    return `${mins}:${secs}`;
-  };
-
-  const handleStopRecording = useCallback(async () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
-      mediaRecorderRef.current.stop();
-    }
-  }, []);
-
-  const processAudio = useCallback(async () => {
-    if (audioChunksRef.current.length === 0) {
-      setIsProcessing(false);
-      return;
-    }
-    setIsProcessing(true);
-    toast({
-      title: "Processing Audio",
-      description: "AI is counting your chants...",
-    });
-
-    const audioBlob = new Blob(audioChunksRef.current, {
-      type: AUDIO_MIME_TYPE,
-    });
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = async () => {
-      const audioDataUri = reader.result as string;
-      try {
-        const result = await countMantras({
-          audioDataUri,
-          mantra,
-          sampleRate: 48000,
-        });
-        setCount((prev) => prev + result.count);
-        setIsAnimating(true);
-        toast({
-          title: "Success",
-          description: `Added ${result.count} chants.`,
-        });
-      } catch (error) {
-        console.error("AI counting error:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Could not count chants from audio.",
-        });
-      } finally {
-        setIsProcessing(false);
-        audioChunksRef.current = [];
-      }
-    };
-  }, [mantra, toast]);
-
-  const startRecording = async () => {
-    startTimer();
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const newMediaRecorder = new MediaRecorder(stream, {
-        mimeType: AUDIO_MIME_TYPE,
-      });
-
-      newMediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      newMediaRecorder.onstop = () => {
-        processAudio();
-        // Once stopped, we can release the media stream tracks
-        stream.getTracks().forEach((track) => track.stop());
-      };
-
-      mediaRecorderRef.current = newMediaRecorder;
-      audioChunksRef.current = [];
-      newMediaRecorder.start();
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Could not start recording:", error);
-      toast({
-        variant: "destructive",
-        title: "Recording Error",
-        description:
-          "Could not access microphone. Please ensure permissions are granted.",
-      });
-      setIsRecording(false);
-    }
-  };
-
-  const handleMicButtonClick = () => {
-    if (isRecording) {
-      handleStopRecording();
-      setIsRecording(false);
-    } else {
-      startRecording();
-    }
-  };
-
   const handleReset = () => {
     setCount(0);
-    setElapsedTime(0);
-    setIsTimerActive(false);
   };
 
   const handleSaveSession = () => {
     if (count > 0) {
-      const newSession: Session = {
+      const newSession: Omit<Session, 'duration'> = {
         id: new Date().toISOString(),
         date: new Date().toLocaleDateString(),
         mantra,
         count,
         malas: parseFloat((count / malaReps).toFixed(2)),
-        duration: formatTime(elapsedTime),
       };
       setSessions([newSession, ...sessions]);
       handleReset();
@@ -244,9 +106,30 @@ export default function MantraJaapClient() {
   };
 
   const malasCompleted = (count / malaReps).toFixed(2);
-  
+
   if (!isClient) {
-    return null;
+    return (
+      <div className="w-full max-w-2xl mx-auto font-headline">
+        <Card className="text-center shadow-xl animate-pulse">
+          <CardHeader>
+            <div className="h-10 bg-muted rounded-md w-1/2 mx-auto"></div>
+            <div className="h-6 bg-muted rounded-md w-1/3 mx-auto mt-2"></div>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center gap-6">
+            <div className="h-24 w-40 bg-muted rounded-lg"></div>
+            <div className="flex justify-around w-full">
+                <div className="h-12 bg-muted rounded-md w-1/4"></div>
+            </div>
+            <div className="h-16 bg-muted rounded-md w-1/2"></div>
+          </CardContent>
+          <CardFooter className="flex justify-center gap-4">
+            <div className="h-10 bg-muted rounded-md w-24"></div>
+            <div className="h-10 bg-muted rounded-md w-32"></div>
+            <div className="h-10 bg-muted rounded-md w-10"></div>
+          </CardFooter>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -304,33 +187,15 @@ export default function MantraJaapClient() {
               <span className="font-bold">{malasCompleted}</span>
               <span>Malas</span>
             </div>
-            <div className="flex flex-col items-center">
-              <span className="font-bold">{formatTime(elapsedTime)}</span>
-              <span>Time</span>
-            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+          <div className="w-full max-w-sm">
             <Button
               size="lg"
-              className="h-16 text-xl"
+              className="h-16 text-xl w-full"
               onClick={handleIncrement}
             >
               <Plus className="w-8 h-8 mr-2" />
               Add
-            </Button>
-            <Button
-              size="lg"
-              className="h-16 text-xl"
-              onClick={handleMicButtonClick}
-              disabled={isProcessing}
-              variant={isRecording ? "destructive" : "default"}
-            >
-              {isProcessing ? (
-                <Loader2 className="w-8 h-8 mr-2 animate-spin" />
-              ) : (
-                <Mic className="w-8 h-8 mr-2" />
-              )}
-              {isRecording ? "Stop" : isProcessing ? "Processing" : "Voice"}
             </Button>
           </div>
         </CardContent>
@@ -383,34 +248,12 @@ export default function MantraJaapClient() {
       </Card>
 
       <Tabs defaultValue="history" className="w-full mt-8">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="current">
-            <Hourglass className="w-4 h-4 mr-2" />
-            Current
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="history">
             <BookOpen className="w-4 h-4 mr-2" />
             History
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="current">
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Session</CardTitle>
-              <CardDescription>
-                Your progress in this session.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-4xl font-bold">{count}</p>
-              <p className="text-muted-foreground">{mantra}</p>
-              <div className="flex justify-around text-lg">
-                <p>Malas: {malasCompleted}</p>
-                <p>Time: {formatTime(elapsedTime)}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
         <TabsContent value="history">
           <Card>
             <CardHeader>
@@ -427,7 +270,6 @@ export default function MantraJaapClient() {
                     <TableHead>Mantra</TableHead>
                     <TableHead className="text-right">Count</TableHead>
                     <TableHead className="text-right">Malas</TableHead>
-                    <TableHead className="text-right">Duration</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -444,14 +286,11 @@ export default function MantraJaapClient() {
                         <TableCell className="text-right">
                           {session.malas}
                         </TableCell>
-                        <TableCell className="text-right">
-                          {session.duration}
-                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center">
+                      <TableCell colSpan={4} className="text-center">
                         No saved sessions yet.
                       </TableCell>
                     </TableRow>

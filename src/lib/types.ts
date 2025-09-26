@@ -4,5 +4,5 @@ export type Session = {
   mantra: string;
   count: number;
   malas: number;
-  duration: string;
+  duration?: string;
 };
