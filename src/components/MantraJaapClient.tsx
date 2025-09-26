@@ -118,7 +118,7 @@ export default function MantraJaapClient() {
     });
   };
 
-  const malasCompleted = (count / malaReps).toFixed(2);
+  const malasCompleted = isClient ? (count / malaReps).toFixed(2) : '0.00';
 
   if (!isClient) {
     return (
@@ -188,7 +188,7 @@ export default function MantraJaapClient() {
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-6">
           <div
-            className="text-8xl font-bold text-primary-foreground"
+            className="text-6xl sm:text-8xl font-bold text-primary-foreground"
             style={{ color: "hsl(var(--primary-foreground))" }}
           >
             {count}
@@ -211,7 +211,7 @@ export default function MantraJaapClient() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
-          <Button variant="outline" onClick={handleReset}>
+          <Button variant="outline" onClick={handleReset} className="active:animate-button-press">
             <RotateCw className="w-4 h-4 mr-2" />
             Reset
           </Button>
@@ -278,70 +278,130 @@ export default function MantraJaapClient() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Mantra</TableHead>
-                    <TableHead className="text-right">Count</TableHead>
-                    <TableHead className="text-right">Malas</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sessions.length > 0 ? (
-                    sessions.map((session) => (
-                      <TableRow key={session.id}>
-                        <TableCell>{session.date}</TableCell>
-                        <TableCell className="truncate max-w-[150px]">
-                          {session.mantra}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {session.count}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {session.malas}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Are you sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone. This will
-                                  permanently delete your session from the
-                                  history.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteSession(session.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+              {/* For Desktop */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Mantra</TableHead>
+                      <TableHead className="text-right">Count</TableHead>
+                      <TableHead className="text-right">Malas</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sessions.length > 0 ? (
+                      sessions.map((session) => (
+                        <TableRow key={session.id}>
+                          <TableCell>{session.date}</TableCell>
+                          <TableCell className="truncate max-w-[150px]">
+                            {session.mantra}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {session.count}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {session.malas}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Trash2 className="w-4 h-4 text-destructive" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Are you sure?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will
+                                    permanently delete your session from the
+                                    history.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteSession(session.id)}
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center">
+                          No saved sessions yet.
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center">
-                        No saved sessions yet.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* For Mobile */}
+              <div className="grid gap-4 md:hidden">
+                {sessions.length > 0 ? (
+                  sessions.map((session) => (
+                    <Card key={session.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold truncate max-w-[200px]">{session.mantra}</p>
+                          <p className="text-sm text-muted-foreground">{session.date}</p>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Are you sure?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete your session from the
+                                history.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteSession(session.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                      <div className="flex justify-between mt-4 text-sm">
+                        <div className="text-center">
+                          <p className="font-bold">{session.count}</p>
+                          <p className="text-muted-foreground">Count</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-bold">{session.malas}</p>
+                          <p className="text-muted-foreground">Malas</p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    No saved sessions yet.
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -349,3 +409,5 @@ export default function MantraJaapClient() {
     </div>
   );
 }
+
+    
