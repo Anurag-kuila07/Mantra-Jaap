@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'Mantra Jaap',
@@ -22,6 +23,8 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
+        <Script async={true} data-cfasync="false" src="//recitalfinancially.com/09085eba4ac2c36a79196531362c2bdf/invoke.js" />
+        <div id="container-09085eba4ac2c36a79196531362c2bdf"></div>
       </body>
     </html>
   );
