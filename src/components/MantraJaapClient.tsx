@@ -44,6 +44,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import {
   Plus,
   RotateCw,
@@ -62,6 +63,8 @@ export default function MantraJaapClient() {
   const [count, setCount] = useState(0);
   const [malaReps, setMalaReps] = useLocalStorage("malaReps", 108);
   const [newMalaReps, setNewMalaReps] = useState(malaReps);
+  const [theme, setTheme] = useLocalStorage("theme", "dark");
+
 
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
   const [isClient, setIsClient] = useState(false);
@@ -71,6 +74,14 @@ export default function MantraJaapClient() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const handleIncrement = () => {
     setCount((prev) => prev + 1);
@@ -244,6 +255,16 @@ export default function MantraJaapClient() {
                     onChange={(e) => setNewMalaReps(Number(e.target.value))}
                   />
                 </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="theme-switch">Dark Theme</Label>
+                   <Switch
+                    id="theme-switch"
+                    checked={theme === 'dark'}
+                    onCheckedChange={(checked) => {
+                      setTheme(checked ? 'dark' : 'light');
+                    }}
+                  />
+                </div>
               </div>
               <DialogFooter>
                 <DialogClose asChild>
@@ -402,3 +423,5 @@ export default function MantraJaapClient() {
     </div>
   );
 }
+
+    
