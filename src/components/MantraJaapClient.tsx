@@ -55,7 +55,6 @@ import {
   Minus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
 
 export default function MantraJaapClient() {
   const [mantra, setMantra] = useLocalStorage("mantra", "Om Namah Shivaya");
@@ -63,29 +62,18 @@ export default function MantraJaapClient() {
   const [count, setCount] = useState(0);
   const [malaReps, setMalaReps] = useLocalStorage("malaReps", 108);
   const [newMalaReps, setNewMalaReps] = useState(malaReps);
-  const [soundOnMala, setSoundOnMala] = useLocalStorage("soundOnMala", true);
 
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
   const [isClient, setIsClient] = useState(false);
-  const [malaAudio, setMalaAudio] = useState<HTMLAudioElement | null>(null);
 
   const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
-    // Bell sound for mala completion
-    setMalaAudio(new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT19x4AEB+PyP/u//lP/h/1j/wf9t/0b/g/+D/3f/Z/+D/3v/Vv+D/1X/a/+p/yT/1/8s/8L/af+c/6D/uf+w/6v/df9//7P/yP/J//n/wv/1/8//7f/P/93/3v/h/+L/4v/b/9r/2P/c/9//3f/e/9v/3//i/+f/5v/j/9n/3P/g/+T/6v/r/+r/6f/p/+r/6//s/+3/7f/s/+3/7v/v/+7/7v/t/+7/8P/x//D/8P/y//H/8P/x//H/8v/y//H/8f/x//L/8//z//P/8//z//T/9P/1//T/9f/1//T/9v/2//b/9v/2//f/9//3//f/9//4//j/+P/4//n/+f/5//n/+f/6//r/+v/6//r/+v/6//r/+v/7//v/+7/7//v/+7/7//v/+7/7v/v/+7/7//w//D/8P/w//D/8P/w//H/8f/x//H/8f/y//L/8v/y//L/8v/y//L/8v/z//P/8//z//P/8//z//P/9P/0//T/9P/0//T/9P/0//X/9f/1//X/9f/1//X/9f/2//b/9v/2//b/9v/2//b/9v/3//f/9//3//f/9//3//f/9//4//j/+P/4//j/+P/4//j/+P/5//n/+f/5//n/+f/5//n/+f/6//r/+v/6//r/+v/6//r/+v/6/vr/+v/6//r/+v/7//v/+7/7//u/+7/7v/u/+7/7v/u/w=="));
   }, []);
 
   const handleIncrement = () => {
-    setCount((prev) => {
-      const newCount = prev + 1;
-      if (soundOnMala && newCount > 0 && newCount % malaReps === 0 && malaAudio) {
-        malaAudio.currentTime = 0;
-        malaAudio.play().catch(e => console.error("Error playing sound:", e));
-      }
-      return newCount;
-    });
+    setCount((prev) => prev + 1);
   };
 
   const handleDecrement = () => {
@@ -254,14 +242,6 @@ export default function MantraJaapClient() {
                     className="w-24"
                     value={newMalaReps}
                     onChange={(e) => setNewMalaReps(Number(e.target.value))}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="sound-feedback">Sound on Mala Completion</Label>
-                  <Switch 
-                    id="sound-feedback"
-                    checked={soundOnMala}
-                    onCheckedChange={setSoundOnMala}
                   />
                 </div>
               </div>
