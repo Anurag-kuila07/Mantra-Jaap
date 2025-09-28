@@ -56,6 +56,7 @@ import {
   Minus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function MantraJaapClient() {
   const [mantra, setMantra] = useLocalStorage("mantra", "Om Namah Shivaya");
@@ -64,7 +65,7 @@ export default function MantraJaapClient() {
   const [malaReps, setMalaReps] = useLocalStorage("malaReps", 108);
   const [newMalaReps, setNewMalaReps] = useState(malaReps);
   const [theme, setTheme] = useLocalStorage("theme", "dark");
-
+  const [isShaking, setIsShaking] = useState(false);
 
   const [sessions, setSessions] = useLocalStorage<Session[]>("sessions", []);
   const [isClient, setIsClient] = useState(false);
@@ -85,6 +86,11 @@ export default function MantraJaapClient() {
 
   const handleIncrement = () => {
     setCount((prev) => prev + 1);
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(100);
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
+    }
   };
 
   const handleDecrement = () => {
@@ -214,7 +220,7 @@ export default function MantraJaapClient() {
             </Button>
             <Button
               size="lg"
-              className="h-16 text-xl w-full"
+              className={cn("h-16 text-xl w-full", isShaking && "shake")}
               style={{ backgroundColor: theme === 'dark' ? '#16a34a' : '#bbf7d0' }}
               onClick={handleIncrement}
             >
