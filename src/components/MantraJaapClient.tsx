@@ -99,7 +99,15 @@ export default function MantraJaapClient() {
   };
 
   const handleDecrement = () => {
-    setCount((prev) => (prev > 0 ? prev - 1 : 0));
+    setCount((prev) => {
+      const newCount = prev > 0 ? prev - 1 : 0;
+      if (typeof window !== "undefined" && "vibrate" in navigator) {
+        if (newCount > 0 && newCount % malaReps === 0) {
+          navigator.vibrate(1000);
+        }
+      }
+      return newCount;
+    });
   };
 
   const handleReset = () => {
