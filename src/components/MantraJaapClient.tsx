@@ -63,7 +63,7 @@ export default function MantraJaapClient() {
   const [newMantra, setNewMantra] = useState(mantra);
   const [count, setCount] = useState(0);
   const [malaReps, setMalaReps] = useLocalStorage("malaReps", 108);
-  const [newMalaReps, setNewMalaReps] = useState(malaReps);
+  const [newMalaReps, setNewMalaReps] = useState<number | string>(malaReps);
   const [theme, setTheme] = useLocalStorage("theme", "dark");
   const [isShaking, setIsShaking] = useState(false);
 
@@ -263,7 +263,7 @@ export default function MantraJaapClient() {
                     type="number"
                     className="w-24"
                     value={newMalaReps}
-                    onChange={(e) => setNewMalaReps(Number(e.target.value))}
+                    onChange={(e) => setNewMalaReps(e.target.value === '' ? '' : Number(e.target.value))}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -279,7 +279,11 @@ export default function MantraJaapClient() {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button onClick={() => setMalaReps(newMalaReps)}>Save</Button>
+                  <Button onClick={() => {
+                    if (typeof newMalaReps === 'number') {
+                      setMalaReps(newMalaReps)
+                    }
+                  }}>Save</Button>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>
