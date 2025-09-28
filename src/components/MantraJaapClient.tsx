@@ -85,11 +85,16 @@ export default function MantraJaapClient() {
   }, [theme]);
 
   const handleIncrement = () => {
-    setCount((prev) => prev + 1);
+    const newCount = count + 1;
+    setCount(newCount);
     if (typeof window !== "undefined" && "vibrate" in navigator) {
+      if (newCount > 0 && newCount % malaReps === 0) {
+        navigator.vibrate(1000);
+      } else {
         navigator.vibrate(100);
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 500);
+      }
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
     }
   };
 
