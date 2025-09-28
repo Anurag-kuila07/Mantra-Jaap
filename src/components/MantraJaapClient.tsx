@@ -207,7 +207,7 @@ export default function MantraJaapClient() {
             <Button
               size="lg"
               className="h-16 text-xl w-full"
-              style={{ backgroundColor: '#4f46e5' }}
+              style={{ backgroundColor: theme === 'dark' ? '#4f46e5' : '#c7d2fe' }}
               onClick={handleDecrement}
             >
               <Minus className="w-8 h-8" />
@@ -215,7 +215,7 @@ export default function MantraJaapClient() {
             <Button
               size="lg"
               className="h-16 text-xl w-full"
-              style={{ backgroundColor: '#16a34a' }}
+              style={{ backgroundColor: theme === 'dark' ? '#16a34a' : '#bbf7d0' }}
               onClick={handleIncrement}
             >
               <Plus className="w-8 h-8" />
@@ -423,5 +423,3 @@ export default function MantraJaapClient() {
     </div>
   );
 }
-
-    
