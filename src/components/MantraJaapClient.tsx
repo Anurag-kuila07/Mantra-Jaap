@@ -208,7 +208,7 @@ export default function MantraJaapClient() {
             <Button
               size="lg"
               className="h-16 text-xl w-full"
-              style={{ backgroundColor: '#2563eb' }}
+              style={{ backgroundColor: '#4f46e5' }}
               onClick={handleDecrement}
             >
               <Minus className="w-8 h-8" />
