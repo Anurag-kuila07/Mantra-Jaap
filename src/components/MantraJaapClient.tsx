@@ -52,6 +52,7 @@ import {
   Pencil,
   BookOpen,
   Trash2,
+  Minus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -85,6 +86,10 @@ export default function MantraJaapClient() {
       }
       return newCount;
     });
+  };
+
+  const handleDecrement = () => {
+    setCount((prev) => (prev > 0 ? prev - 1 : 0));
   };
 
   const handleReset = () => {
@@ -199,19 +204,27 @@ export default function MantraJaapClient() {
               <span>Malas</span>
             </div>
           </div>
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm flex gap-4">
             <Button
               size="lg"
               className="h-16 text-xl w-full"
+              style={{ backgroundColor: '#2563eb' }}
+              onClick={handleDecrement}
+            >
+              <Minus className="w-8 h-8" />
+            </Button>
+            <Button
+              size="lg"
+              className="h-16 text-xl w-full"
+              style={{ backgroundColor: '#16a34a' }}
               onClick={handleIncrement}
             >
-              <Plus className="w-8 h-8 mr-2" />
-              Add
+              <Plus className="w-8 h-8" />
             </Button>
           </div>
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
-          <Button variant="outline" onClick={handleReset} className="active:animate-button-press">
+          <Button variant="outline" onClick={handleReset}>
             <RotateCw className="w-4 h-4 mr-2" />
             Reset
           </Button>
@@ -409,5 +422,3 @@ export default function MantraJaapClient() {
     </div>
   );
 }
-
-    
